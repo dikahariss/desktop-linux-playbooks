@@ -1,0 +1,5 @@
+[ubuntu_desktops]
+localhost ansible_connection=local
+
+[ubuntu_desktops:vars]
+ansible_user=dika
