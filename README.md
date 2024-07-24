@@ -1,4 +1,4 @@
-# Ubuntu 24 Development Environment Setup with Ansible
+# Ubuntu 24 Desktop Setup with Ansible
 
 This repository contains an Ansible playbook for setting up a comprehensive development environment on Ubuntu 24.
 
@@ -15,16 +15,17 @@ This repository contains an Ansible playbook for setting up a comprehensive deve
    sudo apt update && sudo apt upgrade -y
    ```
 
-2. Install Ansible:
+2. Install Ansible and required collections:
    ```bash
    sudo apt install software-properties-common
    sudo add-apt-repository --yes --update ppa:ansible/ansible
    sudo apt install ansible
+   ansible-galaxy collection install community.general
    ```
 
 3. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/ubuntu24-desktop.git
+   git clone https://github.com/dikahariss/ubuntu24-desktop.git
    cd ubuntu24-desktop
    ```
 
@@ -32,15 +33,14 @@ This repository contains an Ansible playbook for setting up a comprehensive deve
 
 5. Run the Ansible playbook:
    ```bash
-   ansible-playbook ubuntu24_desktop_setup.yml --ask-become-pass
+   ansible-playbook playbooks/ubuntu24_desktop_setup.yml --ask-become-pass
    ```
 
 ## What's Included
 
 - Essential development tools (Git, Curl, Wget, Vim, Tmux, etc.)
 - Docker and Docker Compose
-- Python (managed by pyenv)
-- Node.js (managed by nvm)
+- Snap packages (VS Code, LibreOffice, Discord, etc.)
 - IDEs and Text Editors:
   - Visual Studio Code
   - JetBrains IDEs (IntelliJ IDEA Ultimate, DataGrip, PhpStorm, WebStorm, PyCharm Professional)
@@ -59,13 +59,12 @@ Feel free to modify the playbook to suit your specific needs. You can add or rem
 
 After running the playbook:
 1. Restart your system or log out and log back in to ensure all changes take effect.
-2. Open a new terminal to start using Zsh with Oh My Zsh.
-3. Configure your Git global settings:
+2. Configure your Git global settings:
    ```bash
    git config --global user.name "Your Name"
    git config --global user.email "your.email@example.com"
    ```
-4. For JetBrains IDEs, you may need to activate your license or start your trial.
+3. For JetBrains IDEs, you may need to activate your license or start your trial.
 
 
 ---
