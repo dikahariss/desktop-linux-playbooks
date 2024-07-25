@@ -91,12 +91,27 @@
           - telegram-desktop
           - vlc
           - obs-studio
-          - termius-app
           - postman
           - bitwarden
           - pinta
           - brave
         state: present
+
+    - name: Download Termius .deb package
+      ansible.builtin.get_url:
+        url: https://www.termius.com/download/linux/Termius.deb
+        dest: /tmp/Termius.deb
+        mode: '0644'
+
+    - name: Install Termius from .deb package
+      ansible.builtin.apt:
+        deb: /tmp/Termius.deb
+        state: present
+
+    - name: Clean up Termius .deb package
+      ansible.builtin.file:
+        path: /tmp/Termius.deb
+        state: absent
 
     - name: Install snap packages (classic mode)
       community.general.snap:
