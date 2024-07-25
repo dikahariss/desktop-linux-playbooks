@@ -36,6 +36,11 @@ This repository contains an Ansible playbook for setting up a comprehensive deve
    ansible-playbook playbooks/ubuntu24_desktop_setup.yml --ask-become-pass
    ```
 
+6. Run the Ansible playbook for install zsh with oh my zsh
+   ```bash
+   ansible-playbook playbooks/install_zsh_oh_my_zsh.yml --ask-become-pass
+   ```
+
 ## What's Included
 
 - Essential development tools (Git, Curl, Wget, Vim, Tmux, etc.)
