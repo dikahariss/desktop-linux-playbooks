@@ -14,11 +14,18 @@
         update_cache: true
       become: true  # Only use sudo for system-wide installation
 
+    - name: Check current shell
+      ansible.builtin.command:
+        cmd: echo $SHELL
+      register: current_shell
+      changed_when: false
+
     - name: Change default shell to Zsh
       ansible.builtin.user:
         name: "{{ username }}"
         shell: /bin/zsh
       become: true  # Only use sudo for changing shell
+      when: current_shell.stdout != '/bin/zsh'
 
     - name: Debug user and home
       ansible.builtin.debug:
@@ -28,6 +35,7 @@
       ansible.builtin.stat:
         path: "{{ home }}/.oh-my-zsh"
       register: oh_my_zsh_installed
+      changed_when: false
 
     - name: Download Oh My Zsh installer
       ansible.builtin.get_url:
@@ -35,27 +43,33 @@
         dest: "/tmp/install_oh_my_zsh.sh"
         mode: '0755'
       when: not oh_my_zsh_installed.stat.exists
+      changed_when: true
 
     - name: Install Oh My Zsh
-      ansible.builtin.command: /tmp/install_oh_my_zsh.sh
-      args:
-        creates: "{{ home }}/.oh-my-zsh"
+      ansible.builtin.command:
+        cmd: /tmp/install_oh_my_zsh.sh --unattended
+      environment:
+        ZSH: "{{ home }}/.oh-my-zsh"
+        KEEP_ZSHRC: "yes"
       when: not oh_my_zsh_installed.stat.exists
+      changed_when: true
 
     - name: Remove Oh My Zsh installer
       ansible.builtin.file:
         path: "/tmp/install_oh_my_zsh.sh"
         state: absent
+      when: not oh_my_zsh_installed.stat.exists
+      changed_when: false
 
     - name: Update .zshrc file with selected plugins
       ansible.builtin.lineinfile:
         path: "{{ home }}/.zshrc"
         regexp: '^plugins=\(.*\)$'
         line: 'plugins=(git colored-man-pages command-not-found history sudo)'
+      changed_when: true
 
   handlers:
     - name: Restart shell
-      ansible.builtin.shell: exec zsh
-      args:
-        executable: /bin/zsh
+      ansible.builtin.command:
+        cmd: exec zsh
       changed_when: false
