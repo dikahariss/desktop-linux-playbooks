@@ -1,10 +1,10 @@
-# Ubuntu 24 Desktop Setup with Ansible
+# Desktop Linux Setup Playbooks
 
-This repository contains an Ansible playbook for setting up a comprehensive development environment on Ubuntu 24.
+This repository contains Ansible playbooks for setting up comprehensive development environments on various Linux desktop distributions, including but not limited to Ubuntu, and Pop!_OS.
 
 ## Prerequisites
 
-- A fresh installation of Ubuntu 24 Desktop
+- A fresh installation of a Debian-based Linux distribution (e.g., Ubuntu, Pop!_OS)
 - Internet connection
 - Sudo privileges
 
@@ -17,44 +17,45 @@ This repository contains an Ansible playbook for setting up a comprehensive deve
 
 2. Install Ansible and required collections:
    ```bash
-   sudo apt install software-properties-common
-   sudo add-apt-repository --yes --update ppa:ansible/ansible
    sudo apt install ansible
    ansible-galaxy collection install community.general
    ```
 
 3. Clone this repository:
    ```bash
-   git clone https://github.com/dikahariss/ubuntu24-desktop.git
-   cd ubuntu24-desktop
+   git clone https://github.com/dikahariss/desktop-linux-playbooks.git
+   cd desktop-linux-playbooks
    ```
 
-4. Review and customize the playbook (`ubuntu24_desktop_setup.yml`) if needed.
+4. Review and customize the playbooks in the `playbooks` directory as needed.
 
-5. Run the Ansible playbook:
+5. Run the main Ansible playbook:
    ```bash
    ansible-playbook playbooks/ubuntu24_desktop_setup.yml --ask-become-pass
    ```
 
-6. Run the Ansible playbook for install zsh with oh my zsh
+6. Optionally, run additional playbooks:
    ```bash
    ansible-playbook playbooks/install_zsh_oh_my_zsh.yml --ask-become-pass
    ```
+
+## Available Playbooks
+
+- `ubuntu24_desktop_setup.yml`: Main playbook for setting up a development environment
+- `install_zsh_oh_my_zsh.yml`: Installs Zsh and Oh My Zsh
+- `pop!os_desktop_setup.yml`: Setup for Pop!_OS (if applicable)
 
 ## What's Included
 
 - Essential development tools (Git, Curl, Wget, Vim, Tmux, etc.)
 - Docker and Docker Compose
 - Snap packages (VS Code, LibreOffice, Discord, etc.)
-- IDEs and Text Editors:
-  - Visual Studio Code
-  - JetBrains IDEs (IntelliJ IDEA Ultimate, DataGrip, PhpStorm, WebStorm, PyCharm Professional)
-- Browsers: Google Chrome, Firefox, Brave
-- Communication tools: Discord, Telegram, Zoom
-- Productivity tools: LibreOffice, Evince, Thunderbird
-- Development tools: Postman, kubectl, OWASP ZAP
-- Security tools: UFW (Uncomplicated Firewall), Nmap, OpenVPN3
-- Other utilities: VLC, OBS Studio, Bitwarden, Pinta
+- IDEs and Text Editors
+- Web Browsers
+- Communication tools
+- Productivity tools
+- Development and security tools
+- Multimedia applications
 
 ## Customization
 
