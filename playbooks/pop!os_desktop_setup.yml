@@ -1,0 +1,179 @@
+---
+- name: Setup Pop! OS
+  hosts: localhost
+  become: true
+  vars:
+    username: "{{ ansible_user_id }}"
+    home: "/home/{{ username }}"
+    node_version: "20.15.1"
+    python_version: "3.12.4"
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Update and upgrade apt packages
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+
+    - name: Install packages
+      ansible.builtin.apt:
+        pkg:
+          - build-essential
+          - git
+          - curl
+          - wget
+          - vim
+          - tmux
+          - jq
+          - unzip
+          - software-properties-common
+          - apt-transport-https
+          - gnupg
+          - font-manager
+          - google-chrome-stable
+          - thunderbird
+          - firefox
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+          - code
+          - nmap
+        state: present
+
+    - name: Install Flatpak
+      ansible.builtin.apt:
+        name: flatpak
+        state: present
+
+    - name: Add Flathub repository
+      ansible.builtin.command: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+      changed_when: false
+
+    - name: Install Flatpak packages
+      ansible.builtin.command: flatpak install -y flathub {{ item }}
+      loop:
+        - org.libreoffice.LibreOffice
+        - org.gnome.Evince
+        - com.discordapp.Discord
+        - org.telegram.desktop
+        - org.videolan.VLC
+        - com.obsproject.Studio
+        - com.getpostman.Postman
+        - com.bitwarden.desktop
+        - com.github.PintaProject.Pinta
+        - com.brave.Browser
+        - com.jetbrains.IntelliJ-IDEA-Ultimate
+        - com.jetbrains.DataGrip
+        - com.jetbrains.PhpStorm
+        - com.jetbrains.WebStorm
+        - com.jetbrains.PyCharm-Professional
+        - org.zaproxy.ZAP
+        - io.dbeaver.DBeaverCommunity
+      changed_when: false
+
+    - name: Check if Termius is installed
+      ansible.builtin.shell: dpkg -l | grep termius
+      register: termius_installed
+      ignore_errors: true
+      changed_when: false
+
+    - name: Download Termius .deb package
+      ansible.builtin.get_url:
+        url: https://www.termius.com/download/linux/Termius.deb
+        dest: /tmp/Termius.deb
+        mode: '0644'
+      when: termius_installed.rc != 0
+
+    - name: Install Termius from .deb package
+      ansible.builtin.apt:
+        deb: /tmp/Termius.deb
+        state: present
+      when: termius_installed.rc != 0
+
+    - name: Clean up Termius .deb package
+      ansible.builtin.file:
+        path: /tmp/Termius.deb
+        state: absent
+      when: termius_installed.rc != 0
+
+    - name: Check if OpenVPN3 is installed
+      ansible.builtin.shell: dpkg -l | grep openvpn3
+      register: openvpn3_installed
+      ignore_errors: true
+      changed_when: false
+
+    - name: Install OpenVPN3
+      block:
+        - name: Remove old OpenVPN repository files
+          ansible.builtin.file:
+            path: /etc/apt/sources.list.d/openvpn-packages.list
+            state: absent
+
+        - name: Create OpenVPN keyring directory
+          ansible.builtin.file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: '0755'
+
+        - name: Add OpenVPN3 GPG key
+          ansible.builtin.get_url:
+            url: https://swupdate.openvpn.net/repos/openvpn-repo-pkg-key.pub
+            dest: /etc/apt/keyrings/openvpn.asc
+            mode: '0644'
+
+        - name: Add OpenVPN3 Repository
+          ansible.builtin.apt_repository:
+            repo: >-
+              deb [arch=amd64 signed-by=/etc/apt/keyrings/openvpn.asc]
+              https://packages.openvpn.net/openvpn3/debian {{ ansible_distribution_release }} main
+            state: present
+            filename: openvpn-packages
+
+        - name: Install OpenVPN3
+          ansible.builtin.apt:
+            name: openvpn3
+            state: present
+      when: openvpn3_installed.rc != 0
+
+    - name: Configure UFW
+      ansible.builtin.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Enable UFW
+      ansible.builtin.ufw:
+        state: enabled
+        policy: deny
+
+    - name: Check if Zoom is installed
+      ansible.builtin.shell: dpkg -l | grep zoom
+      register: zoom_installed
+      ignore_errors: true
+      changed_when: false
+
+    - name: Download Zoom .deb package
+      ansible.builtin.get_url:
+        url: https://zoom.us/client/latest/zoom_amd64.deb
+        dest: /tmp/zoom_amd64.deb
+        mode: '0644'
+      when: zoom_installed.rc != 0
+
+    - name: Install Zoom from .deb package
+      ansible.builtin.apt:
+        deb: /tmp/zoom_amd64.deb
+        state: present
+      when: zoom_installed.rc != 0
+
+    - name: Clean up Zoom .deb package
+      ansible.builtin.file:
+        path: /tmp/zoom_amd64.deb
+        state: absent
+      when: zoom_installed.rc != 0
+
+  handlers:
+    - name: Restart Docker
+      ansible.builtin.service:
+        name: docker
+        state: restarted
