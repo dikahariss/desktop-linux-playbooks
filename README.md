@@ -42,8 +42,9 @@ This repository contains Ansible playbooks for setting up comprehensive developm
 ## Available Playbooks
 
 - `ubuntu24_desktop_setup.yml`: Main playbook for setting up a development environment
-- `install_zsh_oh_my_zsh.yml`: Installs Zsh and Oh My Zsh
 - `pop!os_desktop_setup.yml`: Setup for Pop!_OS (if applicable)
+- `install_zsh_oh_my_zsh.yml`: Installs Zsh and Oh My Zsh
+- `install_nvm_with_node_lts.yml`: Installs NVM and Node.js LTS
 
 ## What's Included
 
