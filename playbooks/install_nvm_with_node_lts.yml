@@ -1,0 +1,82 @@
+---
+- name: Install NVM, Node.js LTS versions
+  hosts: localhost
+  become: false
+  vars:
+    username: "{{ ansible_env.USER }}"
+    home: "{{ ansible_env.HOME }}"
+    nvm_version: "0.40.0"  # Update this to the latest NVM version
+    node_versions:
+      - "lts/iron"    # Node.js 18.x (Iron)
+      - "lts/hydrogen"  # Node.js 20.x (Hydrogen)
+
+  tasks:
+    - name: Install dependencies
+      become: true
+      ansible.builtin.apt:
+        name:
+          - curl
+          - build-essential
+          - libssl-dev
+        state: present
+        update_cache: true
+
+    - name: Check if NVM is installed
+      ansible.builtin.stat:
+        path: "{{ home }}/.nvm/nvm.sh"
+      register: nvm_installed
+
+    - name: Download NVM installer
+      ansible.builtin.get_url:
+        url: "https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh"
+        dest: "/tmp/install_nvm.sh"
+        mode: '0755'
+      when: not nvm_installed.stat.exists
+
+    - name: Install NVM
+      ansible.builtin.command:
+        cmd: /tmp/install_nvm.sh
+      when: not nvm_installed.stat.exists
+      changed_when: true
+
+    - name: Remove NVM installer
+      ansible.builtin.file:
+        path: "/tmp/install_nvm.sh"
+        state: absent
+      when: not nvm_installed.stat.exists
+
+    - name: Ensure NVM configuration in .zshrc
+      ansible.builtin.lineinfile:
+        path: "{{ home }}/.zshrc"
+        line: "{{ item }}"
+        state: present
+      loop:
+        - 'export NVM_DIR="$HOME/.nvm"'
+        - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm'
+        - '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion'
+
+    - name: Install Node.js LTS versions
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home }}/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install {{ item }}
+      loop: "{{ node_versions }}"
+      args:
+        executable: /bin/zsh
+      register: node_installation
+      changed_when: "'is already installed' not in node_installation.stderr"
+
+    - name: Set default Node.js version (latest LTS)
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home }}/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm alias default {{ node_versions[-1] }}
+      args:
+        executable: /bin/zsh
+      changed_when: true
+
+  handlers:
+    - name: Restart shell
+      ansible.builtin.command:
+        cmd: exec zsh
+      changed_when: false
