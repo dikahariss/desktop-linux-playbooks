@@ -68,6 +68,8 @@
         - com.jetbrains.PyCharm-Professional
         - org.zaproxy.ZAP
         - io.dbeaver.DBeaverCommunity
+        - com.calibre_ebook.calibre
+        - org.flameshot.Flameshot
       changed_when: false
 
     - name: Check if Termius is installed
